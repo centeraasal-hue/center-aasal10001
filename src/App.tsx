@@ -48,6 +48,39 @@ function MainApp() {
 
   const [lastPlacedOrder, setLastPlacedOrder] = useState<Order | null>(null);
 
+  // Verify existing admin session with backend on load
+  useEffect(() => {
+    const verifySavedAdmin = async () => {
+      const saved = localStorage.getItem('alassal_admin_user');
+      if (saved) {
+        try {
+          const user: AdminUser = JSON.parse(saved);
+          if (user?.token) {
+            const verified = await api.adminVerify(user.token);
+            setAdminUser(verified);
+          } else {
+            localStorage.removeItem('alassal_admin_user');
+            setAdminUser(null);
+          }
+        } catch {
+          // Token expired or invalid on server
+          localStorage.removeItem('alassal_admin_user');
+          setAdminUser(null);
+        }
+      }
+    };
+    verifySavedAdmin();
+  }, []);
+
+  // Protected route guard: prevent unauthorized access to admin dashboard
+  useEffect(() => {
+    if (activePage === 'admin' && !adminUser && !loading) {
+      setActivePage('home');
+      setIsAdminLoginOpen(true);
+      showToast('يجب تسجيل الدخول أولاً للوصول إلى لوحة الإدارة', 'error');
+    }
+  }, [activePage, adminUser, loading]);
+
   // Load initial data
   useEffect(() => {
     const fetchData = async () => {
@@ -70,6 +103,10 @@ function MainApp() {
   }, []);
 
   const handleNavigate = (page: string, params: any = {}) => {
+    if (page === 'admin' && !adminUser) {
+      setIsAdminLoginOpen(true);
+      return;
+    }
     setActivePage(page);
     setPageParams(params);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -96,11 +133,14 @@ function MainApp() {
     }
   };
 
-  const handleAdminLogout = () => {
+  const handleAdminLogout = async () => {
+    if (adminUser?.token) {
+      await api.adminLogout(adminUser.token);
+    }
     setAdminUser(null);
     localStorage.removeItem('alassal_admin_user');
     setActivePage('home');
-    showToast('تم تسجيل الخروج من لوحة الإدارة', 'info');
+    showToast('تم تسجيل الخروج من لوحة الإدارة بنجاح', 'info');
   };
 
   const handleOrderSuccess = (order: Order) => {

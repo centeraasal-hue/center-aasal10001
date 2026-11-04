@@ -203,6 +203,30 @@ export const api = {
     };
   },
 
+  async adminVerify(token: string): Promise<AdminUser> {
+    const res = await fetch('/api/admin/verify', {
+      headers: { Authorization: token },
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message || 'انتهت صلاحية الجلسة');
+    return {
+      username: data.user.username,
+      role: data.user.role,
+      token,
+    };
+  },
+
+  async adminLogout(token: string): Promise<void> {
+    try {
+      await fetch('/api/admin/logout', {
+        method: 'POST',
+        headers: { Authorization: token },
+      });
+    } catch (err) {
+      console.warn('Logout request failed:', err);
+    }
+  },
+
   async getAdminStats(token: string): Promise<any> {
     const res = await fetch('/api/admin/stats', {
       headers: { Authorization: token },

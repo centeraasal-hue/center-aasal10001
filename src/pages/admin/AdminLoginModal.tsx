@@ -30,9 +30,11 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
     try {
       const user = await api.adminLogin(password.trim());
       showToast('تم تسجيل الدخول إلى لوحة تحكم سنتر العسال بنجاح', 'success');
+      setPassword('');
       onLoginSuccess(user);
       onClose();
     } catch (err: any) {
+      setPassword('');
       showToast(err.message || 'كلمة المرور غير صحيحة', 'error');
     } finally {
       setLoading(false);
@@ -46,7 +48,10 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
         onClick={e => e.stopPropagation()}
       >
         <button
-          onClick={onClose}
+          onClick={() => {
+            setPassword('');
+            onClose();
+          }}
           className="absolute top-4 left-4 p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
         >
           <X className="w-5 h-5" />
@@ -73,23 +78,26 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
               <input
                 type={showPassword ? 'text' : 'password'}
                 required
+                autoComplete="current-password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder="أدخل كلمة المرور الخاصة بك"
-                className="w-full bg-[#FAF9F5] text-slate-800 text-sm rounded-xl pl-10 pr-10 py-3 border border-slate-200 focus:outline-sky-500"
+                className="w-full bg-[#FAF9F5] text-slate-800 text-sm rounded-xl pl-10 pr-10 py-3 border border-slate-200 focus:outline-sky-500 font-mono"
               />
               <Lock className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                title={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
-            <p className="text-[11px] text-slate-400 mt-1">
-              (كلمة المرور الافتراضية للنظام: <code className="bg-slate-100 px-1 py-0.5 rounded text-slate-700 font-mono">alassal2026</code> مع إمكانية تغييرها من الإعدادات)
-            </p>
+            <div className="flex items-center gap-1.5 mt-2 text-[11px] text-slate-400">
+              <Lock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              <span>منطقة محمية ومشفرة خاصة بإدارة المتجر فقط</span>
+            </div>
           </div>
 
           <button

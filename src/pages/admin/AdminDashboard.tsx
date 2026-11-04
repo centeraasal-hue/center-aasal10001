@@ -106,6 +106,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       setSettings(settingsData);
     } catch (err: any) {
       showToast(err.message || 'حدث خطأ أثناء تحميل بيانات لوحة الإدارة', 'error');
+      if (err.message && (err.message.includes('غير مصرح') || err.message.includes('انتهت صلاحية'))) {
+        onLogout();
+      }
     } finally {
       setLoading(false);
     }

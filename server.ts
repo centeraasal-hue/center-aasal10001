@@ -5,6 +5,8 @@ import fs from 'fs';
 import dotenv from 'dotenv';
 import { GoogleGenAI } from '@google/genai';
 import { fileURLToPath } from 'url';
+import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 dotenv.config();
 
@@ -372,6 +374,12 @@ const initialSettings = {
   }
 };
 
+interface AdminSession {
+  token: string;
+  createdAt: number;
+  expiresAt: number;
+}
+
 interface DbSchema {
   settings: typeof initialSettings;
   categories: typeof initialCategories;
@@ -379,13 +387,24 @@ interface DbSchema {
   orders: any[];
   orderCounter: number;
   adminPassHash: string;
+  sessions?: AdminSession[];
 }
+
+// Secure default salted bcrypt hash for administrative access (cost factor: 10)
+const DEFAULT_ADMIN_HASH = '$2b$10$IKgCQuAKRed7/gaY2sYMUuFSVaLVNWlaGWc6W8X2BpVdrz1ACAZMe';
 
 function loadDb(): DbSchema {
   try {
     if (fs.existsSync(DB_FILE)) {
       const content = fs.readFileSync(DB_FILE, 'utf-8');
       const data = JSON.parse(content);
+      
+      // Upgrade plain text or missing password to bcrypt hash
+      let adminPassHash = data.adminPassHash;
+      if (!adminPassHash || !adminPassHash.startsWith('$2')) {
+        adminPassHash = DEFAULT_ADMIN_HASH;
+      }
+
       // Merge in any missing defaults
       return {
         settings: { ...initialSettings, ...data.settings },
@@ -393,7 +412,8 @@ function loadDb(): DbSchema {
         products: data.products || initialProducts,
         orders: data.orders || [],
         orderCounter: data.orderCounter || 1,
-        adminPassHash: data.adminPassHash || 'alassal2026'
+        adminPassHash,
+        sessions: data.sessions || []
       };
     }
   } catch (err) {
@@ -406,7 +426,8 @@ function loadDb(): DbSchema {
     products: initialProducts,
     orders: [],
     orderCounter: 1,
-    adminPassHash: 'alassal2026'
+    adminPassHash: DEFAULT_ADMIN_HASH,
+    sessions: []
   };
   saveDb(initialData);
   return initialData;
@@ -420,6 +441,19 @@ function saveDb(data: DbSchema) {
   }
 }
 
+// Verify admin session token against active sessions
+function verifyAdminSession(token?: string): boolean {
+  if (!token) return false;
+  const cleanToken = token.startsWith('Bearer ') ? token.slice(7).trim() : token.trim();
+  if (!cleanToken) return false;
+
+  const db = loadDb();
+  const sessions = db.sessions || [];
+  const now = Date.now();
+  const session = sessions.find(s => s.token === cleanToken);
+  return Boolean(session && session.expiresAt > now);
+}
+
 // ---------------- API ROUTES ----------------
 
 // GET store settings
@@ -431,8 +465,8 @@ app.get('/api/settings', (req, res) => {
 // UPDATE store settings (Admin)
 app.put('/api/settings', (req, res) => {
   const token = req.headers.authorization;
-  if (!token || !token.includes('alassal-admin-token')) {
-    return res.status(401).json({ success: false, message: 'غير مصرح لك بالوصول' });
+  if (!verifyAdminSession(token)) {
+    return res.status(401).json({ success: false, message: 'غير مصرح لك بالوصول، يرجى تسجيل الدخول' });
   }
 
   const db = loadDb();
@@ -450,8 +484,8 @@ app.get('/api/categories', (req, res) => {
 // CREATE category
 app.post('/api/categories', (req, res) => {
   const token = req.headers.authorization;
-  if (!token || !token.includes('alassal-admin-token')) {
-    return res.status(401).json({ success: false, message: 'غير مصرح لك بالوصول' });
+  if (!verifyAdminSession(token)) {
+    return res.status(401).json({ success: false, message: 'غير مصرح لك بالوصول، يرجى تسجيل الدخول' });
   }
 
   const db = loadDb();
@@ -473,8 +507,8 @@ app.post('/api/categories', (req, res) => {
 // UPDATE category
 app.put('/api/categories/:id', (req, res) => {
   const token = req.headers.authorization;
-  if (!token || !token.includes('alassal-admin-token')) {
-    return res.status(401).json({ success: false, message: 'غير مصرح لك بالوصول' });
+  if (!verifyAdminSession(token)) {
+    return res.status(401).json({ success: false, message: 'غير مصرح لك بالوصول، يرجى تسجيل الدخول' });
   }
 
   const db = loadDb();
@@ -491,8 +525,8 @@ app.put('/api/categories/:id', (req, res) => {
 // DELETE category
 app.delete('/api/categories/:id', (req, res) => {
   const token = req.headers.authorization;
-  if (!token || !token.includes('alassal-admin-token')) {
-    return res.status(401).json({ success: false, message: 'غير مصرح لك بالوصول' });
+  if (!verifyAdminSession(token)) {
+    return res.status(401).json({ success: false, message: 'غير مصرح لك بالوصول، يرجى تسجيل الدخول' });
   }
 
   const db = loadDb();
@@ -564,8 +598,8 @@ app.get('/api/products/:id', (req, res) => {
 // CREATE product
 app.post('/api/products', (req, res) => {
   const token = req.headers.authorization;
-  if (!token || !token.includes('alassal-admin-token')) {
-    return res.status(401).json({ success: false, message: 'غير مصرح لك بالوصول' });
+  if (!verifyAdminSession(token)) {
+    return res.status(401).json({ success: false, message: 'غير مصرح لك بالوصول، يرجى تسجيل الدخول' });
   }
 
   const db = loadDb();
@@ -608,8 +642,8 @@ app.post('/api/products', (req, res) => {
 // UPDATE product
 app.put('/api/products/:id', (req, res) => {
   const token = req.headers.authorization;
-  if (!token || !token.includes('alassal-admin-token')) {
-    return res.status(401).json({ success: false, message: 'غير مصرح لك بالوصول' });
+  if (!verifyAdminSession(token)) {
+    return res.status(401).json({ success: false, message: 'غير مصرح لك بالوصول، يرجى تسجيل الدخول' });
   }
 
   const db = loadDb();
@@ -637,8 +671,8 @@ app.put('/api/products/:id', (req, res) => {
 // DELETE product
 app.delete('/api/products/:id', (req, res) => {
   const token = req.headers.authorization;
-  if (!token || !token.includes('alassal-admin-token')) {
-    return res.status(401).json({ success: false, message: 'غير مصرح لك بالوصول' });
+  if (!verifyAdminSession(token)) {
+    return res.status(401).json({ success: false, message: 'غير مصرح لك بالوصول، يرجى تسجيل الدخول' });
   }
 
   const db = loadDb();
@@ -765,8 +799,8 @@ app.get('/api/orders/track', (req, res) => {
 // GET all orders (Admin)
 app.get('/api/orders', (req, res) => {
   const token = req.headers.authorization;
-  if (!token || !token.includes('alassal-admin-token')) {
-    return res.status(401).json({ success: false, message: 'غير مصرح لك بالوصول' });
+  if (!verifyAdminSession(token)) {
+    return res.status(401).json({ success: false, message: 'غير مصرح لك بالوصول، يرجى تسجيل الدخول' });
   }
 
   const db = loadDb();
@@ -776,8 +810,8 @@ app.get('/api/orders', (req, res) => {
 // UPDATE order status / payment review (Admin)
 app.put('/api/orders/:id', (req, res) => {
   const token = req.headers.authorization;
-  if (!token || !token.includes('alassal-admin-token')) {
-    return res.status(401).json({ success: false, message: 'غير مصرح لك بالوصول' });
+  if (!verifyAdminSession(token)) {
+    return res.status(401).json({ success: false, message: 'غير مصرح لك بالوصول، يرجى تسجيل الدخول' });
   }
 
   const db = loadDb();
@@ -799,8 +833,8 @@ app.put('/api/orders/:id', (req, res) => {
 // DELETE order (Admin)
 app.delete('/api/orders/:id', (req, res) => {
   const token = req.headers.authorization;
-  if (!token || !token.includes('alassal-admin-token')) {
-    return res.status(401).json({ success: false, message: 'غير مصرح لك بالوصول' });
+  if (!verifyAdminSession(token)) {
+    return res.status(401).json({ success: false, message: 'غير مصرح لك بالوصول، يرجى تسجيل الدخول' });
   }
 
   const db = loadDb();
@@ -814,51 +848,123 @@ app.delete('/api/orders/:id', (req, res) => {
   res.json({ success: true, message: 'تم حذف الطلب نهائياً بنجاح' });
 });
 
-// ADMIN AUTH
-app.post('/api/admin/login', (req, res) => {
-  const { password } = req.body;
-  const db = loadDb();
+// Rate limiting map for admin login (in memory)
+const loginAttempts: Record<string, { count: number; lockedUntil: number }> = {};
 
-  // Secure passcode check (default: alassal2026 or configured password)
-  if (password === db.adminPassHash || password === 'alassal2026') {
+// ADMIN AUTH: LOGIN
+app.post('/api/admin/login', (req, res) => {
+  const ip = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown';
+  const now = Date.now();
+
+  const attemptInfo = loginAttempts[ip];
+  if (attemptInfo && attemptInfo.lockedUntil > now) {
+    const remainingSeconds = Math.ceil((attemptInfo.lockedUntil - now) / 1000);
+    return res.status(429).json({
+      success: false,
+      message: `تم قفل محاولات تسجيل الدخول مؤقتاً لحماية الحساب. يرجى الانتظار ${remainingSeconds} ثانية ثم المحاولة مجدداً.`
+    });
+  }
+
+  const { password } = req.body;
+  if (!password || typeof password !== 'string') {
+    return res.status(400).json({ success: false, message: 'يرجى إدخال كلمة المرور' });
+  }
+
+  const db = loadDb();
+  const isMatch = bcrypt.compareSync(password, db.adminPassHash);
+
+  if (isMatch) {
+    delete loginAttempts[ip];
+
+    // Generate cryptographically secure session token
+    const token = 'caa_' + crypto.randomBytes(32).toString('hex');
+    const newSession: AdminSession = {
+      token,
+      createdAt: now,
+      expiresAt: now + 24 * 60 * 60 * 1000 // 24-hour expiration
+    };
+
+    // Clean expired sessions and save new session
+    db.sessions = (db.sessions || []).filter(s => s.expiresAt > now);
+    db.sessions.push(newSession);
+    saveDb(db);
+
     res.json({
       success: true,
-      token: 'alassal-admin-token-' + Date.now(),
+      token,
       user: { username: 'admin', role: 'superadmin' }
     });
   } else {
+    const current = loginAttempts[ip] || { count: 0, lockedUntil: 0 };
+    current.count += 1;
+    if (current.count >= 5) {
+      current.lockedUntil = now + 5 * 60 * 1000; // 5 minutes lock
+      current.count = 0;
+    }
+    loginAttempts[ip] = current;
+
     res.status(401).json({ success: false, message: 'كلمة المرور غير صحيحة' });
   }
 });
 
-// UPDATE ADMIN PASSWORD
+// ADMIN AUTH: VERIFY SESSION
+app.get('/api/admin/verify', (req, res) => {
+  const token = req.headers.authorization;
+  if (!verifyAdminSession(token)) {
+    return res.status(401).json({ success: false, message: 'انتهت صلاحية الجلسة أو غير مصرح' });
+  }
+  res.json({
+    success: true,
+    user: { username: 'admin', role: 'superadmin' }
+  });
+});
+
+// ADMIN AUTH: LOGOUT
+app.post('/api/admin/logout', (req, res) => {
+  const token = req.headers.authorization;
+  if (token) {
+    const cleanToken = token.startsWith('Bearer ') ? token.slice(7).trim() : token.trim();
+    const db = loadDb();
+    if (db.sessions) {
+      db.sessions = db.sessions.filter(s => s.token !== cleanToken);
+      saveDb(db);
+    }
+  }
+  res.json({ success: true, message: 'تم تسجيل الخروج بنجاح' });
+});
+
+// UPDATE ADMIN PASSWORD (Secure bcrypt hashing)
 app.put('/api/admin/password', (req, res) => {
   const token = req.headers.authorization;
-  if (!token || !token.includes('alassal-admin-token')) {
-    return res.status(401).json({ success: false, message: 'غير مصرح لك' });
+  if (!verifyAdminSession(token)) {
+    return res.status(401).json({ success: false, message: 'غير مصرح لك بالوصول، يرجى تسجيل الدخول' });
   }
 
   const { oldPassword, newPassword } = req.body;
+  if (!oldPassword || !newPassword) {
+    return res.status(400).json({ success: false, message: 'يرجى إدخال كلمة المرور الحالية والجديدة' });
+  }
+
   const db = loadDb();
-
-  if (oldPassword !== db.adminPassHash && oldPassword !== 'alassal2026') {
-    return res.status(400).json({ success: false, message: 'كلمة المرور القديمة غير صحيحة' });
+  if (!bcrypt.compareSync(oldPassword, db.adminPassHash)) {
+    return res.status(400).json({ success: false, message: 'كلمة المرور الحالية غير صحيحة' });
   }
 
-  if (!newPassword || newPassword.length < 6) {
-    return res.status(400).json({ success: false, message: 'يجب أن تكون كلمة المرور الجديدة 6 أحرف على الأقل' });
+  if (typeof newPassword !== 'string' || newPassword.length < 6) {
+    return res.status(400).json({ success: false, message: 'يجب أن تتكون كلمة المرور الجديدة من 6 خانات على الأقل' });
   }
 
-  db.adminPassHash = newPassword;
+  // Hash new password using bcrypt
+  db.adminPassHash = bcrypt.hashSync(newPassword, 10);
   saveDb(db);
-  res.json({ success: true, message: 'تم تغيير كلمة المرور بنجاح' });
+  res.json({ success: true, message: 'تم تغيير كلمة المرور وتشفيرها بنجاح' });
 });
 
 // DASHBOARD STATS (Admin)
 app.get('/api/admin/stats', (req, res) => {
   const token = req.headers.authorization;
-  if (!token || !token.includes('alassal-admin-token')) {
-    return res.status(401).json({ success: false, message: 'غير مصرح' });
+  if (!verifyAdminSession(token)) {
+    return res.status(401).json({ success: false, message: 'غير مصرح لك بالوصول، يرجى تسجيل الدخول' });
   }
 
   const db = loadDb();

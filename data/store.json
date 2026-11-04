@@ -804,5 +804,12 @@
     }
   ],
   "orderCounter": 4,
-  "adminPassHash": "alassal2026"
+  "adminPassHash": "$2b$10$IKgCQuAKRed7/gaY2sYMUuFSVaLVNWlaGWc6W8X2BpVdrz1ACAZMe",
+  "sessions": [
+    {
+      "token": "caa_7f8c9c7e30e191e69d85dca021eecebb49fcd5f24d03399e31c4180dc244e408",
+      "createdAt": 1793795260278,
+      "expiresAt": 1793881660278
+    }
+  ]
 }
