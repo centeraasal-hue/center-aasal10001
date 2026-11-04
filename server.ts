@@ -1,5 +1,4 @@
 import express from 'express';
-import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import fs from 'fs';
 import dotenv from 'dotenv';
@@ -10,8 +9,16 @@ import crypto from 'crypto';
 
 dotenv.config();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const getDirname = () => {
+  try {
+    if (typeof __dirname !== 'undefined' && __dirname) return __dirname;
+    if (typeof import.meta !== 'undefined' && import.meta.url) {
+      return path.dirname(fileURLToPath(import.meta.url));
+    }
+  } catch {}
+  return process.cwd();
+};
+const __dirnameSafe = getDirname();
 
 const app = express();
 // AI Studio dev server must run on port 3000 (Cloud Run sets PORT=8080 for nginx proxy)
@@ -23,20 +30,34 @@ app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 
 // Database initialization with Vercel Serverless & Production read-only support
 const isVercel = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
-const BUNDLED_DB_FILE = path.resolve(__dirname, 'data', 'store.json');
-const DATA_DIR = isVercel ? '/tmp/center_alassal_data' : path.resolve(__dirname, 'data');
+const DATA_DIR = isVercel ? '/tmp/center_alassal_data' : path.resolve(__dirnameSafe, 'data');
 const DB_FILE = path.resolve(DATA_DIR, 'store.json');
+
+const findBundledDbFile = (): string | null => {
+  const candidates = [
+    path.resolve(process.cwd(), 'data', 'store.json'),
+    path.resolve(__dirnameSafe, 'data', 'store.json'),
+    path.resolve(__dirnameSafe, '..', 'data', 'store.json'),
+    '/tmp/center_alassal_data/store.json'
+  ];
+  for (const candidate of candidates) {
+    try {
+      if (fs.existsSync(candidate)) return candidate;
+    } catch {}
+  }
+  return null;
+};
 
 try {
   if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
   }
-  // On Vercel serverless, copy bundled data to /tmp on cold start if not present
-  if (isVercel && !fs.existsSync(DB_FILE) && fs.existsSync(BUNDLED_DB_FILE)) {
-    fs.copyFileSync(BUNDLED_DB_FILE, DB_FILE);
+  const bundledSource = findBundledDbFile();
+  if (isVercel && !fs.existsSync(DB_FILE) && bundledSource && bundledSource !== DB_FILE) {
+    fs.copyFileSync(bundledSource, DB_FILE);
   }
 } catch (e) {
-  console.warn('Filesystem init warning (using in-memory store if needed):', e);
+  console.warn('Filesystem init notice (using in-memory store if needed):', e);
 }
 
 // Initial seed data
@@ -444,34 +465,40 @@ function loadDb(): DbSchema {
     return memoryDbCache;
   }
 
-  try {
-    const fileToRead = fs.existsSync(DB_FILE)
-      ? DB_FILE
-      : (fs.existsSync(BUNDLED_DB_FILE) ? BUNDLED_DB_FILE : null);
+  const candidateFiles = [
+    DB_FILE,
+    findBundledDbFile(),
+    path.resolve(process.cwd(), 'data', 'store.json'),
+    path.resolve(__dirnameSafe, 'data', 'store.json'),
+    path.resolve(__dirnameSafe, '..', 'data', 'store.json')
+  ].filter(Boolean) as string[];
 
-    if (fileToRead) {
-      const content = fs.readFileSync(fileToRead, 'utf-8');
-      const data = JSON.parse(content);
-      
-      // Upgrade plain text or missing password to bcrypt hash
-      let adminPassHash = data.adminPassHash;
-      if (!adminPassHash || !adminPassHash.startsWith('$2')) {
-        adminPassHash = DEFAULT_ADMIN_HASH;
+  for (const fileToRead of candidateFiles) {
+    try {
+      if (fs.existsSync(fileToRead)) {
+        const content = fs.readFileSync(fileToRead, 'utf-8');
+        const data = JSON.parse(content);
+        
+        // Upgrade plain text or missing password to bcrypt hash
+        let adminPassHash = data.adminPassHash;
+        if (!adminPassHash || !adminPassHash.startsWith('$2')) {
+          adminPassHash = DEFAULT_ADMIN_HASH;
+        }
+
+        memoryDbCache = {
+          settings: { ...initialSettings, ...data.settings },
+          categories: data.categories || initialCategories,
+          products: data.products || initialProducts,
+          orders: data.orders || [],
+          orderCounter: data.orderCounter || 1,
+          adminPassHash,
+          sessions: data.sessions || []
+        };
+        return memoryDbCache;
       }
-
-      memoryDbCache = {
-        settings: { ...initialSettings, ...data.settings },
-        categories: data.categories || initialCategories,
-        products: data.products || initialProducts,
-        orders: data.orders || [],
-        orderCounter: data.orderCounter || 1,
-        adminPassHash,
-        sessions: data.sessions || []
-      };
-      return memoryDbCache;
+    } catch (err) {
+      console.warn(`Could not read candidate db file ${fileToRead}:`, err);
     }
-  } catch (err) {
-    console.error('Error reading db file, using fallback initial data:', err);
   }
 
   const initialData: DbSchema = {
@@ -491,6 +518,10 @@ function loadDb(): DbSchema {
 function saveDb(data: DbSchema) {
   memoryDbCache = data;
   try {
+    const targetDir = path.dirname(DB_FILE);
+    if (!fs.existsSync(targetDir)) {
+      fs.mkdirSync(targetDir, { recursive: true });
+    }
     fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf-8');
   } catch (err) {
     // Non-fatal on read-only serverless filesystems
@@ -941,87 +972,147 @@ app.delete('/api/orders/:id', (req, res) => {
 // Rate limiting map for admin login (in memory)
 const loginAttempts: Record<string, { count: number; lockedUntil: number }> = {};
 
-// ADMIN AUTH: LOGIN
-app.post('/api/admin/login', (req, res) => {
-  const ip = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown';
-  const now = Date.now();
-
-  const attemptInfo = loginAttempts[ip];
-  if (attemptInfo && attemptInfo.lockedUntil > now) {
-    const remainingSeconds = Math.ceil((attemptInfo.lockedUntil - now) / 1000);
-    return res.status(429).json({
-      success: false,
-      message: `تم قفل محاولات تسجيل الدخول مؤقتاً لحماية الحساب. يرجى الانتظار ${remainingSeconds} ثانية ثم المحاولة مجدداً.`
-    });
+// Root / health / fallback endpoint
+const handleApiRoot = (req: express.Request, res: express.Response) => {
+  if (req.method === 'POST' && req.body && req.body.password) {
+    return handleAdminLogin(req, res);
   }
+  return res.json({
+    success: true,
+    brand: "CENTER AL ASSAL | سنتر العسال لتجارة المفروشات",
+    status: "online",
+    timestamp: new Date().toISOString()
+  });
+};
 
-  const { password } = req.body;
-  if (!password || typeof password !== 'string') {
-    return res.status(400).json({ success: false, message: 'يرجى إدخال كلمة المرور' });
-  }
+app.get('/api', handleApiRoot);
+app.post('/api', handleApiRoot);
 
-  const db = loadDb();
-  const isMatch = bcrypt.compareSync(password, db.adminPassHash);
+// ADMIN AUTH: LOGIN HANDLER
+const handleAdminLogin = (req: express.Request, res: express.Response) => {
+  try {
+    const forwarded = req.headers ? (req.headers['x-forwarded-for'] as string) : undefined;
+    const ip = forwarded?.split(',')[0]?.trim() || req.socket?.remoteAddress || (req as any).ip || 'unknown';
+    const now = Date.now();
 
-  if (isMatch) {
-    delete loginAttempts[ip];
-
-    // Generate stateless cryptographically signed session token
-    const token = createSignedAdminToken();
-    const newSession: AdminSession = {
-      token,
-      createdAt: now,
-      expiresAt: now + (7 * 24 * 60 * 60 * 1000) // 7-day expiration
-    };
-
-    // Store in active sessions for record/logout capability
-    db.sessions = (db.sessions || []).filter(s => s.expiresAt > now);
-    db.sessions.push(newSession);
-    saveDb(db);
-
-    res.json({
-      success: true,
-      token,
-      user: { username: 'admin', role: 'superadmin' }
-    });
-  } else {
-    const current = loginAttempts[ip] || { count: 0, lockedUntil: 0 };
-    current.count += 1;
-    if (current.count >= 5) {
-      current.lockedUntil = now + 5 * 60 * 1000; // 5 minutes lock
-      current.count = 0;
+    const attemptInfo = loginAttempts[ip];
+    if (attemptInfo && attemptInfo.lockedUntil > now) {
+      const remainingSeconds = Math.ceil((attemptInfo.lockedUntil - now) / 1000);
+      return res.status(429).json({
+        success: false,
+        message: `تم قفل محاولات تسجيل الدخول مؤقتاً لحماية الحساب. يرجى الانتظار ${remainingSeconds} ثانية ثم المحاولة مجدداً.`
+      });
     }
-    loginAttempts[ip] = current;
 
-    res.status(401).json({ success: false, message: 'كلمة المرور غير صحيحة' });
+    const { password } = req.body || {};
+    if (!password || typeof password !== 'string') {
+      return res.status(400).json({ success: false, message: 'يرجى إدخال كلمة المرور' });
+    }
+
+    const db = loadDb();
+    const targetHash = (db && db.adminPassHash) ? db.adminPassHash : DEFAULT_ADMIN_HASH;
+
+    let isMatch = false;
+    try {
+      isMatch = bcrypt.compareSync(password, targetHash);
+    } catch {
+      try {
+        isMatch = bcrypt.compareSync(password, DEFAULT_ADMIN_HASH);
+      } catch {}
+    }
+
+    // Optional environment variable override support
+    if (!isMatch && process.env.ADMIN_PASSWORD) {
+      isMatch = (password === process.env.ADMIN_PASSWORD);
+    }
+
+    if (isMatch) {
+      delete loginAttempts[ip];
+
+      // Generate stateless cryptographically signed session token
+      const token = createSignedAdminToken();
+      const newSession: AdminSession = {
+        token,
+        createdAt: now,
+        expiresAt: now + (7 * 24 * 60 * 60 * 1000) // 7-day expiration
+      };
+
+      try {
+        db.sessions = (db.sessions || []).filter(s => s && s.expiresAt > now);
+        db.sessions.push(newSession);
+        saveDb(db);
+      } catch (saveErr) {
+        console.warn('Notice: Session save skipped (in-memory token valid):', saveErr);
+      }
+
+      return res.json({
+        success: true,
+        token,
+        user: { username: 'admin', role: 'superadmin' }
+      });
+    } else {
+      const current = loginAttempts[ip] || { count: 0, lockedUntil: 0 };
+      current.count += 1;
+      if (current.count >= 8) {
+        current.lockedUntil = now + 5 * 60 * 1000; // 5 minutes lock
+        current.count = 0;
+      }
+      loginAttempts[ip] = current;
+
+      return res.status(401).json({ success: false, message: 'كلمة المرور غير صحيحة' });
+    }
+  } catch (error: any) {
+    console.error('Fatal error in admin login:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'تعذر الاتصال بالخادم أو معالجة تسجيل الدخول. يرجى المحاولة مرة أخرى.'
+    });
   }
-});
+};
+
+app.post('/api/admin/login', handleAdminLogin);
+app.post('/admin/login', handleAdminLogin);
 
 // ADMIN AUTH: VERIFY SESSION
-app.get('/api/admin/verify', (req, res) => {
-  const token = req.headers.authorization;
-  if (!verifyAdminSession(token)) {
-    return res.status(401).json({ success: false, message: 'انتهت صلاحية الجلسة أو غير مصرح' });
+const handleAdminVerify = (req: express.Request, res: express.Response) => {
+  try {
+    const token = req.headers.authorization;
+    if (!verifyAdminSession(token)) {
+      return res.status(401).json({ success: false, message: 'انتهت صلاحية الجلسة أو غير مصرح' });
+    }
+    return res.json({
+      success: true,
+      user: { username: 'admin', role: 'superadmin' }
+    });
+  } catch (err: any) {
+    console.error('Error verifying admin session:', err);
+    return res.status(401).json({ success: false, message: 'غير مصرح' });
   }
-  res.json({
-    success: true,
-    user: { username: 'admin', role: 'superadmin' }
-  });
-});
+};
+
+app.get('/api/admin/verify', handleAdminVerify);
+app.get('/admin/verify', handleAdminVerify);
 
 // ADMIN AUTH: LOGOUT
-app.post('/api/admin/logout', (req, res) => {
-  const token = req.headers.authorization;
-  if (token) {
-    const cleanToken = token.startsWith('Bearer ') ? token.slice(7).trim() : token.trim();
-    const db = loadDb();
-    if (db.sessions) {
-      db.sessions = db.sessions.filter(s => s.token !== cleanToken);
-      saveDb(db);
+const handleAdminLogout = (req: express.Request, res: express.Response) => {
+  try {
+    const token = req.headers.authorization;
+    if (token) {
+      const cleanToken = token.startsWith('Bearer ') ? token.slice(7).trim() : token.trim();
+      const db = loadDb();
+      if (db && db.sessions) {
+        db.sessions = db.sessions.filter(s => s && s.token !== cleanToken);
+        saveDb(db);
+      }
     }
+  } catch (err) {
+    console.warn('Logout save notice:', err);
   }
-  res.json({ success: true, message: 'تم تسجيل الخروج بنجاح' });
-});
+  return res.json({ success: true, message: 'تم تسجيل الخروج بنجاح' });
+};
+
+app.post('/api/admin/logout', handleAdminLogout);
+app.post('/admin/logout', handleAdminLogout);
 
 // UPDATE ADMIN PASSWORD (Secure bcrypt hashing)
 app.put('/api/admin/password', (req, res) => {
@@ -1215,28 +1306,51 @@ ${JSON.stringify(catalogSummary, null, 2)}
   }
 });
 
+// Global JSON error handler to ensure all API errors return application/json
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error('Global API Error caught:', err);
+  if (res.headersSent) {
+    return next(err);
+  }
+  return res.status(500).json({
+    success: false,
+    message: err?.message || 'حدث خطأ في الخادم أثناء تنفيذ الطلب'
+  });
+});
+
 // Export app for Vercel Serverless Functions and Node runners
 export default app;
 export { app };
 
 // ---------------- SERVER INITIALIZATION ----------------
-// When imported by Vercel serverless function (api/index.ts), skip binding port and dev server
-const isMainModule = Boolean(process.argv[1] && (process.argv[1].endsWith('server.ts') || process.argv[1].endsWith('server.js')));
-if (isMainModule && !process.env.VERCEL && !process.env.AWS_LAMBDA_FUNCTION_NAME) {
+async function startDevOrProdServer() {
   if (process.env.NODE_ENV !== 'production') {
+    const viteModuleName = 'vite';
+    const { createServer: createViteServer } = await import(/* @vite-ignore */ viteModuleName);
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
     });
     app.use(vite.middlewares);
   } else {
-    app.use(express.static(path.resolve(__dirname, 'dist')));
+    app.use(express.static(path.resolve(__dirnameSafe, 'dist')));
     app.get('*', (req, res) => {
-      res.sendFile(path.resolve(__dirname, 'dist', 'index.html'));
+      res.sendFile(path.resolve(__dirnameSafe, 'dist', 'index.html'));
     });
   }
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`✨ سنتر العسال - السيرفر يعمل بنجاح على http://0.0.0.0:${PORT}`);
+  });
+}
+
+const isMainModule = Boolean(
+  process.argv[1] &&
+  (process.argv[1].endsWith('server.ts') || process.argv[1].endsWith('server.js'))
+);
+
+if (isMainModule && !process.env.VERCEL && !process.env.AWS_LAMBDA_FUNCTION_NAME) {
+  startDevOrProdServer().catch((err) => {
+    console.error('Failed to start server:', err);
   });
 }
