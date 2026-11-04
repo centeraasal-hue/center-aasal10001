@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Cairo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #FAF9F5;
+    color: #2D3748;
+  }
+}
+
+/* Custom luxury scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #F8F6F0;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Smooth glass effect for light theme */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.7);
+}
+
+.champagne-border {
+  border-color: rgba(212, 175, 55, 0.35);
+}
+
+.champagne-gradient {
+  background: linear-gradient(135deg, #FDFBF7 0%, #F5EBE1 100%);
+}
+
+.sky-gradient {
+  background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%);
+}

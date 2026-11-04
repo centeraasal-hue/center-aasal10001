@@ -1,0 +1,6 @@
+{
+  "name": "CENTER AL ASSAL | سنتر العسال لتجارة المفروشات",
+  "description": "المتجر الإلكتروني الفاخر لسنتر العسال لتجارة المفروشات الراقية، أطقم الملايات، البطاطين، اللحاف، والمفارش الفاخرة بأعلى جودة وتصميم عصري.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
