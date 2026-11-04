@@ -1,10 +1,39 @@
 import { Product, ProductCategory, StoreSettings, Order, AdminUser } from '../types';
 
+async function safeJson<T = any>(res: Response, fallbackError: string): Promise<T> {
+  const contentType = res.headers.get('content-type') || '';
+  if (!contentType.includes('application/json')) {
+    if (!res.ok) {
+      throw new Error(`تعذر الاتصال بالخادم (${res.status}): يرجى التأكد من تشغيل السيرفر أو إعدادات مسار API`);
+    }
+    throw new Error('استجابة الخادم غير متوافقة');
+  }
+
+  let data: any;
+  try {
+    data = await res.json();
+  } catch {
+    throw new Error('تعذر قراءة بيانات استجابة الخادم');
+  }
+
+  if (!res.ok || (data && data.success === false)) {
+    throw new Error(data?.message || fallbackError);
+  }
+
+  return data;
+}
+
+function authHeader(token: string): string {
+  if (!token) return '';
+  const clean = token.trim();
+  return clean.startsWith('Bearer ') ? clean : `Bearer ${clean}`;
+}
+
 export const api = {
   // Store Settings
   async getSettings(): Promise<StoreSettings> {
     const res = await fetch('/api/settings');
-    const data = await res.json();
+    const data = await safeJson(res, 'فشل جلب إعدادات المتجر');
     return data.settings;
   },
 
@@ -13,12 +42,11 @@ export const api = {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: token,
+        Authorization: authHeader(token),
       },
       body: JSON.stringify(settings),
     });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.message || 'فشل تحديث الإعدادات');
+    const data = await safeJson(res, 'فشل تحديث الإعدادات');
     return data.settings;
   },
 
@@ -34,12 +62,11 @@ export const api = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: token,
+        Authorization: authHeader(token),
       },
       body: JSON.stringify(category),
     });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.message || 'فشل إنشاء القسم');
+    const data = await safeJson(res, 'فشل إنشاء القسم');
     return data.category;
   },
 
@@ -48,22 +75,20 @@ export const api = {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: token,
+        Authorization: authHeader(token),
       },
       body: JSON.stringify(category),
     });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.message || 'فشل تحديث القسم');
+    const data = await safeJson(res, 'فشل تحديث القسم');
     return data.category;
   },
 
   async deleteCategory(id: string, token: string): Promise<void> {
     const res = await fetch(`/api/categories/${id}`, {
       method: 'DELETE',
-      headers: { Authorization: token },
+      headers: { Authorization: authHeader(token) },
     });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.message || 'فشل حذف القسم');
+    await safeJson(res, 'فشل حذف القسم');
   },
 
   // Products
@@ -86,14 +111,14 @@ export const api = {
     if (params?.sort) query.append('sort', params.sort);
 
     const res = await fetch(`/api/products?${query.toString()}`);
-    const data = await res.json();
+    const data = await safeJson(res, 'فشل جلب المنتجات');
     return data.products || [];
   },
 
   async getProduct(id: string): Promise<Product> {
     const res = await fetch(`/api/products/${id}`);
-    const data = await res.json();
-    if (!data.success || !data.product) throw new Error('المنتج غير موجود');
+    const data = await safeJson(res, 'المنتج غير موجود');
+    if (!data.product) throw new Error('المنتج غير موجود');
     return data.product;
   },
 
@@ -102,12 +127,11 @@ export const api = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: token,
+        Authorization: authHeader(token),
       },
       body: JSON.stringify(product),
     });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.message || 'فشل إنشاء المنتج');
+    const data = await safeJson(res, 'فشل إنشاء المنتج');
     return data.product;
   },
 
@@ -116,22 +140,20 @@ export const api = {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: token,
+        Authorization: authHeader(token),
       },
       body: JSON.stringify(product),
     });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.message || 'فشل تحديث المنتج');
+    const data = await safeJson(res, 'فشل تحديث المنتج');
     return data.product;
   },
 
   async deleteProduct(id: string, token: string): Promise<void> {
     const res = await fetch(`/api/products/${id}`, {
       method: 'DELETE',
-      headers: { Authorization: token },
+      headers: { Authorization: authHeader(token) },
     });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.message || 'فشل حذف المنتج');
+    await safeJson(res, 'فشل حذف المنتج');
   },
 
   // Orders
@@ -157,10 +179,9 @@ export const api = {
 
   async getOrders(token: string): Promise<Order[]> {
     const res = await fetch('/api/orders', {
-      headers: { Authorization: token },
+      headers: { Authorization: authHeader(token) },
     });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.message || 'فشل جلب الطلبات');
+    const data = await safeJson(res, 'فشل جلب الطلبات');
     return data.orders || [];
   },
 
@@ -169,22 +190,20 @@ export const api = {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: token,
+        Authorization: authHeader(token),
       },
       body: JSON.stringify(updates),
     });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.message || 'فشل تحديث الطلب');
+    const data = await safeJson(res, 'فشل تحديث الطلب');
     return data.order;
   },
 
   async deleteOrder(id: string, token: string): Promise<void> {
     const res = await fetch(`/api/orders/${id}`, {
       method: 'DELETE',
-      headers: { Authorization: token },
+      headers: { Authorization: authHeader(token) },
     });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.message || 'فشل حذف الطلب');
+    await safeJson(res, 'فشل حذف الطلب');
   },
 
   // Admin Auth & Stats
@@ -194,24 +213,27 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ password }),
     });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.message || 'كلمة المرور غير صحيحة');
+
+    const data = await safeJson(res, 'كلمة المرور غير صحيحة');
+    if (!data.token) {
+      throw new Error('لم يتم استلام رمز الجلسة من الخادم');
+    }
+
     return {
-      username: data.user.username,
-      role: data.user.role,
+      username: data.user?.username || 'admin',
+      role: data.user?.role || 'superadmin',
       token: data.token,
     };
   },
 
   async adminVerify(token: string): Promise<AdminUser> {
     const res = await fetch('/api/admin/verify', {
-      headers: { Authorization: token },
+      headers: { Authorization: authHeader(token) },
     });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.message || 'انتهت صلاحية الجلسة');
+    const data = await safeJson(res, 'انتهت صلاحية الجلسة أو غير مصرح');
     return {
-      username: data.user.username,
-      role: data.user.role,
+      username: data.user?.username || 'admin',
+      role: data.user?.role || 'superadmin',
       token,
     };
   },
@@ -220,7 +242,7 @@ export const api = {
     try {
       await fetch('/api/admin/logout', {
         method: 'POST',
-        headers: { Authorization: token },
+        headers: { Authorization: authHeader(token) },
       });
     } catch (err) {
       console.warn('Logout request failed:', err);
@@ -229,10 +251,9 @@ export const api = {
 
   async getAdminStats(token: string): Promise<any> {
     const res = await fetch('/api/admin/stats', {
-      headers: { Authorization: token },
+      headers: { Authorization: authHeader(token) },
     });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.message || 'فشل جلب الإحصائيات');
+    const data = await safeJson(res, 'فشل جلب الإحصائيات');
     return data.stats;
   },
 
@@ -241,12 +262,11 @@ export const api = {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: token,
+        Authorization: authHeader(token),
       },
       body: JSON.stringify({ oldPassword, newPassword }),
     });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.message || 'فشل تغيير كلمة المرور');
+    await safeJson(res, 'فشل تغيير كلمة المرور');
   },
 
   // AI Assistant Chat

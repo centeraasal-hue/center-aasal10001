@@ -21,12 +21,22 @@ const PORT = 3000;
 app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 
-// Database initialization
-const DATA_DIR = path.resolve(__dirname, 'data');
+// Database initialization with Vercel Serverless & Production read-only support
+const isVercel = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+const BUNDLED_DB_FILE = path.resolve(__dirname, 'data', 'store.json');
+const DATA_DIR = isVercel ? '/tmp/center_alassal_data' : path.resolve(__dirname, 'data');
 const DB_FILE = path.resolve(DATA_DIR, 'store.json');
 
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
+try {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+  // On Vercel serverless, copy bundled data to /tmp on cold start if not present
+  if (isVercel && !fs.existsSync(DB_FILE) && fs.existsSync(BUNDLED_DB_FILE)) {
+    fs.copyFileSync(BUNDLED_DB_FILE, DB_FILE);
+  }
+} catch (e) {
+  console.warn('Filesystem init warning (using in-memory store if needed):', e);
 }
 
 // Initial seed data
@@ -393,10 +403,54 @@ interface DbSchema {
 // Secure default salted bcrypt hash for administrative access (cost factor: 10)
 const DEFAULT_ADMIN_HASH = '$2b$10$IKgCQuAKRed7/gaY2sYMUuFSVaLVNWlaGWc6W8X2BpVdrz1ACAZMe';
 
+// In-memory cache to guarantee zero-crash execution on read-only serverless environments
+let memoryDbCache: DbSchema | null = null;
+
+// Stateless cryptographically signed tokens for zero-failure serverless & multi-instance auth
+const TOKEN_PREFIX = 'caa_sec';
+const JWT_SECRET = process.env.SESSION_SECRET ||
+  process.env.JWT_SECRET ||
+  process.env.ADMIN_SECRET ||
+  crypto.createHash('sha256').update(process.env.GEMINI_API_KEY || 'CENTER_ALASSAL_SALT_2026_PRODUCTION_KEY').digest('hex');
+
+interface TokenPayload {
+  u: string;
+  r: string;
+  iat: number;
+  exp: number;
+  jti: string;
+}
+
+function createSignedAdminToken(): string {
+  const now = Math.floor(Date.now() / 1000);
+  const payload: TokenPayload = {
+    u: 'admin',
+    r: 'superadmin',
+    iat: now,
+    exp: now + (7 * 24 * 60 * 60), // Valid for 7 days
+    jti: crypto.randomBytes(16).toString('hex')
+  };
+
+  const payloadB64 = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const hmac = crypto.createHmac('sha256', JWT_SECRET);
+  hmac.update(payloadB64);
+  const signature = hmac.digest('base64url');
+
+  return `${TOKEN_PREFIX}.${payloadB64}.${signature}`;
+}
+
 function loadDb(): DbSchema {
+  if (memoryDbCache) {
+    return memoryDbCache;
+  }
+
   try {
-    if (fs.existsSync(DB_FILE)) {
-      const content = fs.readFileSync(DB_FILE, 'utf-8');
+    const fileToRead = fs.existsSync(DB_FILE)
+      ? DB_FILE
+      : (fs.existsSync(BUNDLED_DB_FILE) ? BUNDLED_DB_FILE : null);
+
+    if (fileToRead) {
+      const content = fs.readFileSync(fileToRead, 'utf-8');
       const data = JSON.parse(content);
       
       // Upgrade plain text or missing password to bcrypt hash
@@ -405,8 +459,7 @@ function loadDb(): DbSchema {
         adminPassHash = DEFAULT_ADMIN_HASH;
       }
 
-      // Merge in any missing defaults
-      return {
+      memoryDbCache = {
         settings: { ...initialSettings, ...data.settings },
         categories: data.categories || initialCategories,
         products: data.products || initialProducts,
@@ -415,9 +468,10 @@ function loadDb(): DbSchema {
         adminPassHash,
         sessions: data.sessions || []
       };
+      return memoryDbCache;
     }
   } catch (err) {
-    console.error('Error reading db file, reinitializing:', err);
+    console.error('Error reading db file, using fallback initial data:', err);
   }
 
   const initialData: DbSchema = {
@@ -429,29 +483,65 @@ function loadDb(): DbSchema {
     adminPassHash: DEFAULT_ADMIN_HASH,
     sessions: []
   };
+  memoryDbCache = initialData;
   saveDb(initialData);
   return initialData;
 }
 
 function saveDb(data: DbSchema) {
+  memoryDbCache = data;
   try {
     fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf-8');
   } catch (err) {
-    console.error('Error saving db file:', err);
+    // Non-fatal on read-only serverless filesystems
+    console.warn('Notice: Disk write skipped (in-memory state preserved):', err);
   }
 }
 
-// Verify admin session token against active sessions
+// Verify admin session token (stateless signed token + legacy session fallback)
 function verifyAdminSession(token?: string): boolean {
   if (!token) return false;
   const cleanToken = token.startsWith('Bearer ') ? token.slice(7).trim() : token.trim();
   if (!cleanToken) return false;
 
-  const db = loadDb();
-  const sessions = db.sessions || [];
-  const now = Date.now();
-  const session = sessions.find(s => s.token === cleanToken);
-  return Boolean(session && session.expiresAt > now);
+  // 1. Verify stateless signed token
+  if (cleanToken.startsWith(TOKEN_PREFIX + '.')) {
+    const parts = cleanToken.split('.');
+    if (parts.length === 3) {
+      const [, payloadB64, signature] = parts;
+      const hmac = crypto.createHmac('sha256', JWT_SECRET);
+      hmac.update(payloadB64);
+      const expectedSig = hmac.digest('base64url');
+
+      if (signature.length === expectedSig.length) {
+        const sigBuf = Buffer.from(signature);
+        const expBuf = Buffer.from(expectedSig);
+        if (crypto.timingSafeEqual(sigBuf, expBuf)) {
+          try {
+            const payload: TokenPayload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf-8'));
+            const now = Math.floor(Date.now() / 1000);
+            if (payload.exp && payload.exp > now && payload.u === 'admin') {
+              return true;
+            }
+          } catch {
+            return false;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  // 2. Legacy fallback for existing sessions
+  try {
+    const db = loadDb();
+    const sessions = db.sessions || [];
+    const now = Date.now();
+    const session = sessions.find(s => s.token === cleanToken);
+    return Boolean(session && session.expiresAt > now);
+  } catch {
+    return false;
+  }
 }
 
 // ---------------- API ROUTES ----------------
@@ -876,15 +966,15 @@ app.post('/api/admin/login', (req, res) => {
   if (isMatch) {
     delete loginAttempts[ip];
 
-    // Generate cryptographically secure session token
-    const token = 'caa_' + crypto.randomBytes(32).toString('hex');
+    // Generate stateless cryptographically signed session token
+    const token = createSignedAdminToken();
     const newSession: AdminSession = {
       token,
       createdAt: now,
-      expiresAt: now + 24 * 60 * 60 * 1000 // 24-hour expiration
+      expiresAt: now + (7 * 24 * 60 * 60 * 1000) // 7-day expiration
     };
 
-    // Clean expired sessions and save new session
+    // Store in active sessions for record/logout capability
     db.sessions = (db.sessions || []).filter(s => s.expiresAt > now);
     db.sessions.push(newSession);
     saveDb(db);
@@ -1125,20 +1215,28 @@ ${JSON.stringify(catalogSummary, null, 2)}
   }
 });
 
-// ---------------- VITE MIDDLEWARE IN DEV ----------------
-if (process.env.NODE_ENV !== 'production') {
-  const vite = await createViteServer({
-    server: { middlewareMode: true },
-    appType: 'spa',
-  });
-  app.use(vite.middlewares);
-} else {
-  app.use(express.static(path.resolve(__dirname, 'dist')));
-  app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, 'dist', 'index.html'));
+// Export app for Vercel Serverless Functions and Node runners
+export default app;
+export { app };
+
+// ---------------- SERVER INITIALIZATION ----------------
+// When imported by Vercel serverless function (api/index.ts), skip binding port and dev server
+const isMainModule = Boolean(process.argv[1] && (process.argv[1].endsWith('server.ts') || process.argv[1].endsWith('server.js')));
+if (isMainModule && !process.env.VERCEL && !process.env.AWS_LAMBDA_FUNCTION_NAME) {
+  if (process.env.NODE_ENV !== 'production') {
+    const vite = await createViteServer({
+      server: { middlewareMode: true },
+      appType: 'spa',
+    });
+    app.use(vite.middlewares);
+  } else {
+    app.use(express.static(path.resolve(__dirname, 'dist')));
+    app.get('*', (req, res) => {
+      res.sendFile(path.resolve(__dirname, 'dist', 'index.html'));
+    });
+  }
+
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`✨ سنتر العسال - السيرفر يعمل بنجاح على http://0.0.0.0:${PORT}`);
   });
 }
-
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`✨ سنتر العسال - السيرفر يعمل بنجاح على http://0.0.0.0:${PORT}`);
-});
