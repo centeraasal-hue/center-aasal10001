@@ -1,0 +1,842 @@
+// Auto-generated typed seed store data for zero-loader Cloudflare & Node compatibility
+export const initialStoreData = {
+  "settings": {
+    "brandName": "CENTER AL ASSAL | سنتر العسال لتجارة المفروشات",
+    "brandNameAr": "سنتر العسال لتجارة المفروشات",
+    "brandNameEn": "CENTER AL ASSAL",
+    "logoUrl": "",
+    "heroBadge": "كولكشن 2026 الحصري – فخامة وأناقة تدوم",
+    "heroTitle": "فخامة المفروشات العصرية لمنزل الأحلام",
+    "heroSubtitle": "ننتقي لكم أرقى خامات القطن المصري والمفروشات الفاخرة التي تمنح غرفتكم الدفء والأناقة والراحة المطلقة بأعلى معايير الجودة.",
+    "heroImage": "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=1600&q=80",
+    "announcementText": "✨ شحن مجاني للطلبات بقيمة 1500 ج.م أو أكثر لجميع المحافظات | خصومات خاصة على تشكيلة العرائس 2026",
+    "showAnnouncement": true,
+    "contactPhones": [
+      "01277714100",
+      "01279207793"
+    ],
+    "whatsappNumber": "01277714100",
+    "email": "centeraasal@gmail.com",
+    "branches": [
+      {
+        "id": "branch-1",
+        "name": "الفرع الأول – المعرض الرئيسي",
+        "address": "8 شارع أنور السادات",
+        "phone": "01277714100",
+        "whatsapp": "01277714100",
+        "workingHours": "يومياً من الساعة 10:00 صباحاً حتى 11:00 مساءً",
+        "mapsUrl": "https://maps.google.com/?q=8+شارع+أنور+السادات"
+      },
+      {
+        "id": "branch-2",
+        "name": "الفرع الثاني – عمود السواري",
+        "address": "95 عمود السواري – كرموز",
+        "phone": "01279207793",
+        "whatsapp": "01279207793",
+        "workingHours": "يومياً من الساعة 11:00 صباحاً حتى 11:00 مساءً",
+        "mapsUrl": "https://maps.google.com/?q=95+عمود+السواري+كرموز"
+      }
+    ],
+    "paymentSettings": {
+      "codEnabled": true,
+      "instaPayEnabled": true,
+      "instaPayHandle": "alassal.center@instapay",
+      "instaPayAccountName": "سنتر العسال للمفروشات",
+      "instaPayPhone": "01277714100",
+      "walletEnabled": true,
+      "walletNumber": "01277714100",
+      "walletAccountName": "سنتر العسال",
+      "walletProvider": "فودافون كاش / إنستاباي / أورنج كاش / اتصالات كاش",
+      "paymentInstructions": "يرجى تحويل إجمالي المبلغ إلى المعرّف أو الرقم الموضح، ثم إرفاق صورة إشعار التحويل لتأكيد الطلب فوراً من قبل الإدارة."
+    },
+    "shippingSettings": {
+      "defaultShippingCost": 45,
+      "freeShippingThreshold": 1500,
+      "governorates": [
+        {
+          "name": "الإسكندرية",
+          "cost": 35,
+          "deliveryDays": "24 ساعة"
+        },
+        {
+          "name": "القاهرة",
+          "cost": 45,
+          "deliveryDays": "1 - 2 يوم"
+        },
+        {
+          "name": "الجيزة",
+          "cost": 45,
+          "deliveryDays": "1 - 2 يوم"
+        },
+        {
+          "name": "البحيرة",
+          "cost": 45,
+          "deliveryDays": "1 - 2 يوم"
+        },
+        {
+          "name": "الغربية",
+          "cost": 50,
+          "deliveryDays": "2 يوم"
+        },
+        {
+          "name": "الدقهلية",
+          "cost": 50,
+          "deliveryDays": "2 يوم"
+        },
+        {
+          "name": "الشرقية",
+          "cost": 50,
+          "deliveryDays": "2 يوم"
+        },
+        {
+          "name": "القليوبية",
+          "cost": 45,
+          "deliveryDays": "1 - 2 يوم"
+        },
+        {
+          "name": "كفر الشيخ",
+          "cost": 50,
+          "deliveryDays": "2 يوم"
+        },
+        {
+          "name": "المنوفية",
+          "cost": 50,
+          "deliveryDays": "2 يوم"
+        },
+        {
+          "name": "دمياط",
+          "cost": 50,
+          "deliveryDays": "2 يوم"
+        },
+        {
+          "name": "بورسعيد",
+          "cost": 55,
+          "deliveryDays": "2 يوم"
+        },
+        {
+          "name": "الإسماعيلية",
+          "cost": 55,
+          "deliveryDays": "2 يوم"
+        },
+        {
+          "name": "السويس",
+          "cost": 55,
+          "deliveryDays": "2 يوم"
+        },
+        {
+          "name": "بني سويف",
+          "cost": 60,
+          "deliveryDays": "2 - 3 أيام"
+        },
+        {
+          "name": "الفيوم",
+          "cost": 60,
+          "deliveryDays": "2 - 3 أيام"
+        },
+        {
+          "name": "المنيا",
+          "cost": 65,
+          "deliveryDays": "3 أيام"
+        },
+        {
+          "name": "أسيوط",
+          "cost": 65,
+          "deliveryDays": "3 أيام"
+        },
+        {
+          "name": "سوهاج",
+          "cost": 70,
+          "deliveryDays": "3 أيام"
+        },
+        {
+          "name": "قنا",
+          "cost": 70,
+          "deliveryDays": "3 أيام"
+        },
+        {
+          "name": "الأقصر",
+          "cost": 75,
+          "deliveryDays": "3 - 4 أيام"
+        },
+        {
+          "name": "أسوان",
+          "cost": 75,
+          "deliveryDays": "3 - 4 أيام"
+        },
+        {
+          "name": "مطروح",
+          "cost": 65,
+          "deliveryDays": "2 - 3 أيام"
+        },
+        {
+          "name": "البحر الأحمر",
+          "cost": 80,
+          "deliveryDays": "3 - 4 أيام"
+        }
+      ]
+    },
+    "aiAssistantEnabled": true,
+    "aiWelcomeMessage": "أهلاً بك في سنتر العسال للمفروشات! 🛏️ أنا ASSAL AI، مساعدك الذكي. يمكنني ترشيح أطقم الملايات والبطاطين، وشرح الخامات والمقاسات، ومساعدتك في تتبع أي طلب.",
+    "policies": {
+      "returnPolicy": "نحن نضمن رضاك التام عن كل قطعة. يحق للعميل استبدال أو استرجاع المنتج خلال 14 يوماً من تاريخ الاستلام بشرط أن يكون بحالته الأصلية وداخل تغليفه ولم يُستعمل أو يُغسل.",
+      "privacyPolicy": "نلتزم بحماية خصوصية بياناتك ومعلوماتك الشخصية. لا نستخدم أرقام الهواتف أو العناوين إلا لغرض إتمام وتوصيل طلبك عبر مندوبي الشحن المعتمدين لدينا.",
+      "shippingPolicy": "تصل شحنتك خلال 24 - 48 ساعة في الإسكندرية والقاهرة الكبرى، وخلال 2 - 3 أيام لباقي المحافظات. يتاح للعميل معاينة المنتجات وفحصها عند الاستلام قبل الدفع."
+    }
+  },
+  "categories": [
+    {
+      "id": "cat-sheets",
+      "name": "أطقم الملايات",
+      "nameEn": "Bed Sheet Sets",
+      "slug": "bed-sheets",
+      "description": "أطقم ملايات قطن مصري 100% ناعمة ومريحة وتدوم طويلاً",
+      "image": "https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&w=800&q=80",
+      "icon": "BedDouble"
+    },
+    {
+      "id": "cat-blankets",
+      "name": "البطاطين",
+      "nameEn": "Blankets",
+      "slug": "blankets",
+      "description": "بطاطين مورا وإسباني وكوري فائقة النعومة والدفء لجميع الفصول",
+      "image": "https://images.unsplash.com/photo-1580301762395-21ce84d00bc6?auto=format&fit=crop&w=800&q=80",
+      "icon": "CloudSnow"
+    },
+    {
+      "id": "cat-duvets",
+      "name": "اللحاف",
+      "nameEn": "Duvets & Comforters",
+      "slug": "duvets",
+      "description": "ألحفة فايبر ميكرو وسوفت بأحدث نقوش المودرن والكلاسيك",
+      "image": "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=800&q=80",
+      "icon": "Layers"
+    },
+    {
+      "id": "cat-bedspreads",
+      "name": "المفارش",
+      "nameEn": "Bedspreads",
+      "slug": "bedspreads",
+      "description": "مفارش سرير للعرائس والمناسبات بتطريزات فاخرة وخامات جاكار راقية",
+      "image": "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=800&q=80",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "cat-towels",
+      "name": "الفوط والبشاكير",
+      "nameEn": "Towels & Bath Sheets",
+      "slug": "towels",
+      "description": "فوط قطنية 100% عالية الامتصاص ونعومة تدوم مع كل غسلة",
+      "image": "https://images.unsplash.com/photo-1616046229478-9901c5536a45?auto=format&fit=crop&w=800&q=80",
+      "icon": "Bath"
+    },
+    {
+      "id": "cat-pillows",
+      "name": "المخدات",
+      "nameEn": "Pillows & Cushions",
+      "slug": "pillows",
+      "description": "مخدات طبية وفايبر ريش نعام توفر أقصى درجات الراحة للرقبة والعمود الفقري",
+      "image": "https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&w=800&q=80",
+      "icon": "Smile"
+    },
+    {
+      "id": "cat-rugs",
+      "name": "السجاد",
+      "nameEn": "Rugs & Carpets",
+      "slug": "rugs",
+      "description": "مشايات وسجاد غرف نوم وصالونات بتصاميم عصرية وألوان متناسقة",
+      "image": "https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&w=800&q=80",
+      "icon": "Grid"
+    },
+    {
+      "id": "cat-curtains",
+      "name": "الستائر",
+      "nameEn": "Curtains",
+      "slug": "curtains",
+      "description": "ستائر شيفون وقطيفة وبلاك أوت جاهزة للتركيب تضفي لمسة ساحرة على غرفتك",
+      "image": "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80",
+      "icon": "Maximize"
+    },
+    {
+      "id": "cat-bridal",
+      "name": "أطقم العرائس",
+      "nameEn": "Bridal Sets",
+      "slug": "bridal-sets",
+      "description": "تشكيلات حصرية ومتكاملة لجهاز العروسة بتخفيضات خاصة وهدايا قيمة",
+      "image": "https://images.unsplash.com/photo-1507652313519-d4e9174996dd?auto=format&fit=crop&w=800&q=80",
+      "icon": "Crown"
+    }
+  ],
+  "products": [
+    {
+      "id": "prod-1793629919392",
+      "name": "فوط هابي ",
+      "description": "**فوطة هابي – HAPPY**\n\n- **الخامة:** قطن ناعم.\n- **الملمس:** ناعم ومريح على البشرة.\n- **الامتصاص:** قدرة عالية على امتصاص المياه.\n- **الجودة:** خامة عملية للاستخدام اليومي.\n- **الاستخدام:** مناسبة للوجه والجسم حسب المقاس.\n- **العناية:** سهلة الغسيل وإعادة الاستخدام.\n- **الميزة:** تجمع بين الراحة والنعومة والعملية.\n\n**هابي HAPPY – نعومة وراحة في كل استخدام.**",
+      "categoryId": "cat-towels",
+      "categoryName": "الفوط والبشاكير",
+      "price": 850,
+      "originalPrice": 1000,
+      "discountPercent": 15,
+      "images": [
+        "https://images.unsplash.com/photo-1616046229478-9901c5536a45?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1616046229478-9901c5536a45?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sizes": [
+        "مقاس قياسي"
+      ],
+      "colors": [
+        {
+          "name": "عاجي",
+          "hex": "#FAF9F5"
+        },
+        {
+          "name": "بيج",
+          "hex": "#EADCC9"
+        }
+      ],
+      "fabric": "قطن مصري 100%",
+      "stock": 40,
+      "isAvailable": true,
+      "isNewArrival": true,
+      "isBestSeller": false,
+      "isFeatured": true,
+      "rating": 5,
+      "reviewCount": 0,
+      "specifications": [],
+      "careInstructions": "",
+      "createdAt": "2026-11-02T14:31:59.392Z"
+    },
+    {
+      "id": "prod-1793629919286",
+      "name": "فوط هابي ",
+      "description": "**فوطة هابي – HAPPY**\n\n- **الخامة:** قطن ناعم.\n- **الملمس:** ناعم ومريح على البشرة.\n- **الامتصاص:** قدرة عالية على امتصاص المياه.\n- **الجودة:** خامة عملية للاستخدام اليومي.\n- **الاستخدام:** مناسبة للوجه والجسم حسب المقاس.\n- **العناية:** سهلة الغسيل وإعادة الاستخدام.\n- **الميزة:** تجمع بين الراحة والنعومة والعملية.\n\n**هابي HAPPY – نعومة وراحة في كل استخدام.**",
+      "categoryId": "cat-towels",
+      "categoryName": "الفوط والبشاكير",
+      "price": 850,
+      "originalPrice": 1000,
+      "discountPercent": 15,
+      "images": [
+        "https://images.unsplash.com/photo-1616046229478-9901c5536a45?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1616046229478-9901c5536a45?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sizes": [
+        "مقاس قياسي"
+      ],
+      "colors": [
+        {
+          "name": "عاجي",
+          "hex": "#FAF9F5"
+        },
+        {
+          "name": "بيج",
+          "hex": "#EADCC9"
+        }
+      ],
+      "fabric": "قطن مصري 100%",
+      "stock": 40,
+      "isAvailable": true,
+      "isNewArrival": true,
+      "isBestSeller": false,
+      "isFeatured": true,
+      "rating": 5,
+      "reviewCount": 0,
+      "specifications": [],
+      "careInstructions": "",
+      "createdAt": "2026-11-02T14:31:59.286Z"
+    },
+    {
+      "id": "prod-1793629918952",
+      "name": "فوط هابي ",
+      "description": "**فوطة هابي – HAPPY**\n\n- **الخامة:** قطن ناعم.\n- **الملمس:** ناعم ومريح على البشرة.\n- **الامتصاص:** قدرة عالية على امتصاص المياه.\n- **الجودة:** خامة عملية للاستخدام اليومي.\n- **الاستخدام:** مناسبة للوجه والجسم حسب المقاس.\n- **العناية:** سهلة الغسيل وإعادة الاستخدام.\n- **الميزة:** تجمع بين الراحة والنعومة والعملية.\n\n**هابي HAPPY – نعومة وراحة في كل استخدام.**",
+      "categoryId": "cat-towels",
+      "categoryName": "الفوط والبشاكير",
+      "price": 850,
+      "originalPrice": 1000,
+      "discountPercent": 15,
+      "images": [
+        "https://images.unsplash.com/photo-1616046229478-9901c5536a45?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1616046229478-9901c5536a45?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sizes": [
+        "مقاس قياسي"
+      ],
+      "colors": [
+        {
+          "name": "عاجي",
+          "hex": "#FAF9F5"
+        },
+        {
+          "name": "بيج",
+          "hex": "#EADCC9"
+        }
+      ],
+      "fabric": "قطن مصري 100%",
+      "stock": 40,
+      "isAvailable": true,
+      "isNewArrival": true,
+      "isBestSeller": false,
+      "isFeatured": true,
+      "rating": 5,
+      "reviewCount": 0,
+      "specifications": [],
+      "careInstructions": "",
+      "createdAt": "2026-11-02T14:31:58.952Z"
+    },
+    {
+      "id": "prod-1793629917983",
+      "name": "فوط هابي ",
+      "description": "**فوطة هابي – HAPPY**\n\n- **الخامة:** قطن ناعم.\n- **الملمس:** ناعم ومريح على البشرة.\n- **الامتصاص:** قدرة عالية على امتصاص المياه.\n- **الجودة:** خامة عملية للاستخدام اليومي.\n- **الاستخدام:** مناسبة للوجه والجسم حسب المقاس.\n- **العناية:** سهلة الغسيل وإعادة الاستخدام.\n- **الميزة:** تجمع بين الراحة والنعومة والعملية.\n\n**هابي HAPPY – نعومة وراحة في كل استخدام.**",
+      "categoryId": "cat-towels",
+      "categoryName": "الفوط والبشاكير",
+      "price": 850,
+      "originalPrice": 1000,
+      "discountPercent": 15,
+      "images": [
+        "https://images.unsplash.com/photo-1616046229478-9901c5536a45?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1616046229478-9901c5536a45?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sizes": [
+        "مقاس قياسي"
+      ],
+      "colors": [
+        {
+          "name": "عاجي",
+          "hex": "#FAF9F5"
+        },
+        {
+          "name": "بيج",
+          "hex": "#EADCC9"
+        }
+      ],
+      "fabric": "قطن مصري 100%",
+      "stock": 40,
+      "isAvailable": true,
+      "isNewArrival": true,
+      "isBestSeller": false,
+      "isFeatured": true,
+      "rating": 5,
+      "reviewCount": 0,
+      "specifications": [],
+      "careInstructions": "",
+      "createdAt": "2026-11-02T14:31:57.984Z"
+    },
+    {
+      "id": "prod-1793629916909",
+      "name": "فوط هابي ",
+      "description": "**فوطة هابي – HAPPY**\n\n- **الخامة:** قطن ناعم.\n- **الملمس:** ناعم ومريح على البشرة.\n- **الامتصاص:** قدرة عالية على امتصاص المياه.\n- **الجودة:** خامة عملية للاستخدام اليومي.\n- **الاستخدام:** مناسبة للوجه والجسم حسب المقاس.\n- **العناية:** سهلة الغسيل وإعادة الاستخدام.\n- **الميزة:** تجمع بين الراحة والنعومة والعملية.\n\n**هابي HAPPY – نعومة وراحة في كل استخدام.**",
+      "categoryId": "cat-towels",
+      "categoryName": "الفوط والبشاكير",
+      "price": 850,
+      "originalPrice": 1000,
+      "discountPercent": 15,
+      "images": [
+        "https://images.unsplash.com/photo-1616046229478-9901c5536a45?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1616046229478-9901c5536a45?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sizes": [
+        "مقاس قياسي"
+      ],
+      "colors": [
+        {
+          "name": "عاجي",
+          "hex": "#FAF9F5"
+        },
+        {
+          "name": "بيج",
+          "hex": "#EADCC9"
+        }
+      ],
+      "fabric": "قطن مصري 100%",
+      "stock": 40,
+      "isAvailable": true,
+      "isNewArrival": true,
+      "isBestSeller": false,
+      "isFeatured": true,
+      "rating": 5,
+      "reviewCount": 0,
+      "specifications": [],
+      "careInstructions": "",
+      "createdAt": "2026-11-02T14:31:56.909Z"
+    },
+    {
+      "id": "prod-1793629916533",
+      "name": "فوط هابي ",
+      "description": "**فوطة هابي – HAPPY**\n\n- **الخامة:** قطن ناعم.\n- **الملمس:** ناعم ومريح على البشرة.\n- **الامتصاص:** قدرة عالية على امتصاص المياه.\n- **الجودة:** خامة عملية للاستخدام اليومي.\n- **الاستخدام:** مناسبة للوجه والجسم حسب المقاس.\n- **العناية:** سهلة الغسيل وإعادة الاستخدام.\n- **الميزة:** تجمع بين الراحة والنعومة والعملية.\n\n**هابي HAPPY – نعومة وراحة في كل استخدام.**",
+      "categoryId": "cat-towels",
+      "categoryName": "الفوط والبشاكير",
+      "price": 850,
+      "originalPrice": 1000,
+      "discountPercent": 15,
+      "images": [
+        "https://images.unsplash.com/photo-1616046229478-9901c5536a45?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1616046229478-9901c5536a45?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sizes": [
+        "مقاس قياسي"
+      ],
+      "colors": [
+        {
+          "name": "عاجي",
+          "hex": "#FAF9F5"
+        },
+        {
+          "name": "بيج",
+          "hex": "#EADCC9"
+        }
+      ],
+      "fabric": "قطن مصري 100%",
+      "stock": 40,
+      "isAvailable": true,
+      "isNewArrival": true,
+      "isBestSeller": false,
+      "isFeatured": true,
+      "rating": 5,
+      "reviewCount": 0,
+      "specifications": [],
+      "careInstructions": "",
+      "createdAt": "2026-11-02T14:31:56.533Z"
+    },
+    {
+      "id": "prod-1",
+      "name": "طقم ملاية رويال قطن مصري 100% تطريز ناعم - 6 قطع",
+      "description": "طقم ملاية سرير كبير فاخر مصنوع من أنقى خيوط القطن المصري طويل التيلة المعالج ضد الانكماش. يتضمن الملاية الكبيرة، 2 كيس مخدة كبير، 2 كيس خدادية بتطريز أنيق، وخدادية ديكور.",
+      "categoryId": "cat-sheets",
+      "categoryName": "أطقم الملايات",
+      "price": 890,
+      "originalPrice": 1150,
+      "discountPercent": 22,
+      "images": [
+        "https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&w=1000&q=80",
+        "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=1000&q=80"
+      ],
+      "sizes": [
+        "سرير كبير (240x260 سم)",
+        "سرير كينج (260x280 سم)"
+      ],
+      "colors": [
+        {
+          "name": "أبيض عاجي",
+          "hex": "#FAF9F5"
+        },
+        {
+          "name": "بيج كريمي",
+          "hex": "#EADCC9"
+        },
+        {
+          "name": "أزرق ثلجي",
+          "hex": "#D4EAF7"
+        },
+        {
+          "name": "مريمي هادئ",
+          "hex": "#D2DCB6"
+        }
+      ],
+      "fabric": "قطن مصري 100% - كثافة 300 غرزة",
+      "stock": 21,
+      "isAvailable": true,
+      "isNewArrival": true,
+      "isBestSeller": true,
+      "isFeatured": true,
+      "rating": 4.9,
+      "reviewCount": 38,
+      "specifications": [
+        {
+          "label": "محتويات الطقم",
+          "value": "ملاية فلات + 2 كيس مخدة + 2 كيس خدادية + خدادية مربعة"
+        },
+        {
+          "label": "المقاس الرئيسي",
+          "value": "240 × 260 سم"
+        },
+        {
+          "label": "بلد الصنع",
+          "value": "صنع في مصر بأعلى معايير التصدير"
+        }
+      ],
+      "careInstructions": "غسيل آلي بماء فاتر وتجنب المبيضات للحفاظ على نعومة القطن ونضارة الألوان"
+    },
+    {
+      "id": "prod-2",
+      "name": "لحاف مايكروفايبر سوفت وجهين كابوتونيه عصري",
+      "description": "لحاف مودرن دافئ جداً ومريح وخفيف على الجسم، محشو بفايبر سوفت مستورد عالي الكثافة لا يتكتل عند الغسيل. يتميز بتصميم وجهين بلونين متناسقين لتجديد ديكور الغرفة بسهولة.",
+      "categoryId": "cat-duvets",
+      "categoryName": "اللحاف",
+      "price": 1350,
+      "originalPrice": 1650,
+      "discountPercent": 18,
+      "images": [
+        "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1000&q=80",
+        "https://images.unsplash.com/photo-1540518614846-7ede433c4ef7?auto=format&fit=crop&w=1000&q=80"
+      ],
+      "sizes": [
+        "كينج (240x260 سم)",
+        "مفرد دايس (180x240 سم)"
+      ],
+      "colors": [
+        {
+          "name": "أزرق سماوي مع بيج",
+          "hex": "#7EC8E3"
+        },
+        {
+          "name": "عاجي لؤلؤي",
+          "hex": "#FDFBF7"
+        },
+        {
+          "name": "رمادي ثلجي",
+          "hex": "#E2E8F0"
+        }
+      ],
+      "fabric": "مايكروفايبر حريري مستورد فائق النعومة",
+      "stock": 18,
+      "isAvailable": true,
+      "isNewArrival": false,
+      "isBestSeller": true,
+      "isFeatured": true,
+      "rating": 4.8,
+      "reviewCount": 42,
+      "specifications": [
+        {
+          "label": "الحشوة الداخلية",
+          "value": "فايبر هولوكون معالج مضاد للبكتيريا 450 جرام/م²"
+        },
+        {
+          "label": "التطريز",
+          "value": "حياكة كابوتونيه حرارية هندسية متينة"
+        }
+      ]
+    },
+    {
+      "id": "prod-3",
+      "name": "بطانية حفر ليزر فاخرة طبقتين مورا جولد دافئة",
+      "description": "بطانية طبقتين وزن 6.5 كجم، نسيج مخملي ناعم الملمس مع حفر ليزر ثلاثي الأبعاد يعكس لمسات الفخامة الملكية. تدفئة ممتازة في ليالي الشتاء الباردة.",
+      "categoryId": "cat-blankets",
+      "categoryName": "البطاطين",
+      "price": 1850,
+      "originalPrice": 2200,
+      "discountPercent": 16,
+      "images": [
+        "https://images.unsplash.com/photo-1580301762395-21ce84d00bc6?auto=format&fit=crop&w=1000&q=80"
+      ],
+      "sizes": [
+        "كبير (220x240 سم)"
+      ],
+      "colors": [
+        {
+          "name": "شامبين ذهبي",
+          "hex": "#E5C378"
+        },
+        {
+          "name": "بيج كابتشينو",
+          "hex": "#D6C7B2"
+        },
+        {
+          "name": "أزرق بترولي فاتح",
+          "hex": "#6BA8C6"
+        }
+      ],
+      "fabric": "أكريليك ومخمل حراري مضغوط مستورد",
+      "stock": 12,
+      "isAvailable": true,
+      "isNewArrival": true,
+      "isBestSeller": true,
+      "isFeatured": true,
+      "rating": 5,
+      "reviewCount": 29
+    },
+    {
+      "id": "prod-4",
+      "name": "مفرش سرير عروسة تركي جاكار مطرز 8 قطع",
+      "description": "مفرش سرير فاخر جداً مخصص لأفخم غرف النوم والعرائس، خامة جاكار تركي منسوجة ببريق خفيف مع خداديات تطريز يدوي متقن وشال سرير إضافي.",
+      "categoryId": "cat-bedspreads",
+      "categoryName": "المفارش",
+      "price": 2450,
+      "originalPrice": 3100,
+      "discountPercent": 21,
+      "images": [
+        "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=1000&q=80"
+      ],
+      "sizes": [
+        "جامبو (260x280 سم)"
+      ],
+      "colors": [
+        {
+          "name": "أوف وايت عاجي",
+          "hex": "#FDFCF7"
+        },
+        {
+          "name": "شامبين ناعم",
+          "hex": "#EADCC9"
+        }
+      ],
+      "fabric": "جاكار حريري تركي + بطانة قطنية مريحة",
+      "stock": 8,
+      "isAvailable": true,
+      "isNewArrival": true,
+      "isBestSeller": false,
+      "isFeatured": true,
+      "rating": 4.9,
+      "reviewCount": 19
+    },
+    {
+      "id": "prod-5",
+      "name": "فوطه هابي ",
+      "description": "**فوطة هابي – HAPPY**\n\n- **الخامة:** قطن ناعم.\n- **الملمس:** ناعم ومريح على البشرة.\n- **الامتصاص:** قدرة عالية على امتصاص المياه.\n- **الجودة:** خامة عملية للاستخدام اليومي.\n- **الاستخدام:** مناسبة للوجه والجسم حسب المقاس.\n- **العناية:** سهلة الغسيل وإعادة الاستخدام.\n- **الميزة:** تجمع بين الراحة والنعومة والعملية.\n\n**هابي HAPPY – نعومة وراحة في كل استخدام.**",
+      "categoryId": "cat-sheets",
+      "categoryName": "أطقم الملايات",
+      "price": 1500,
+      "originalPrice": 1800,
+      "discountPercent": 17,
+      "images": [
+        "https://images.unsplash.com/photo-1616046229478-9901c5536a45?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1616046229478-9901c5536a45?auto=format&fit=crop&w=800&q=80"
+      ],
+      "sizes": [],
+      "colors": [
+        {
+          "name": "أبيض وسماوي",
+          "hex": "#E0F2FE"
+        },
+        {
+          "name": "بيج عسلي",
+          "hex": "#EDE0D4"
+        },
+        {
+          "name": "أخضر مريمي",
+          "hex": "#D4DEC8"
+        }
+      ],
+      "fabric": "قطن مصري 100% هيدروفيليك 600 GSM",
+      "stock": 35,
+      "isAvailable": true,
+      "isNewArrival": false,
+      "isBestSeller": true,
+      "isFeatured": false,
+      "rating": 4.7,
+      "reviewCount": 54
+    },
+    {
+      "id": "prod-6",
+      "name": "مخدة طبية ميموري فوم مع جل تبريد مريح",
+      "description": "مخدة طبية بتصميم مريح يحمي فقرات الرقبة والكتفين ويوفر تدفق هواء مستمر، مزودة بطبقة جل تبريد لتنظيم حرارة النوم وضمان نوم عميق ومريح.",
+      "categoryId": "cat-pillows",
+      "categoryName": "المخدات",
+      "price": 490,
+      "originalPrice": 650,
+      "discountPercent": 25,
+      "images": [
+        "https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&w=1000&q=80"
+      ],
+      "sizes": [
+        "قياسي (50x70 سم)"
+      ],
+      "colors": [
+        {
+          "name": "أبيض ثلجي",
+          "hex": "#FFFFFF"
+        }
+      ],
+      "fabric": "غطاء بامبو مضاد للبكتيريا + ميموري فوم علاجي",
+      "stock": 40,
+      "isAvailable": true,
+      "isNewArrival": true,
+      "isBestSeller": false,
+      "isFeatured": false,
+      "rating": 4.8,
+      "reviewCount": 22
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord-1793630211079-tj38",
+      "orderCode": "CAA-2026-00002",
+      "customerName": "طلب تجريبي للحذف",
+      "customerPhone": "01277714100",
+      "customerEmail": "",
+      "governorate": "الإسكندرية",
+      "area": "",
+      "detailedAddress": "شارع تجريبي",
+      "notes": "",
+      "items": [
+        {
+          "productId": "prod-1",
+          "productName": "ملاية",
+          "price": 100,
+          "quantity": 1
+        }
+      ],
+      "subtotal": 100,
+      "shippingCost": 35,
+      "total": 135,
+      "paymentMethod": "cod",
+      "paymentStatus": "cod_pending",
+      "paymentReceiptImage": "",
+      "status": "pending",
+      "internalNotes": "",
+      "createdAt": "2026-11-02T14:36:51.080Z",
+      "updatedAt": "2026-11-02T14:36:51.080Z"
+    },
+    {
+      "id": "ord-1793628555165-i4pm",
+      "orderCode": "CAA-2026-00001",
+      "customerName": "أحمد محمود",
+      "customerPhone": "01277714100",
+      "customerEmail": "",
+      "governorate": "الإسكندرية",
+      "area": "",
+      "detailedAddress": "سموحة شارع فوزي معاذ",
+      "notes": "",
+      "items": [
+        {
+          "productId": "prod-1",
+          "productName": "طقم ملاية رويال",
+          "price": 890,
+          "quantity": 1
+        }
+      ],
+      "subtotal": 890,
+      "shippingCost": 35,
+      "total": 925,
+      "paymentMethod": "cod",
+      "paymentStatus": "cod_pending",
+      "paymentReceiptImage": "",
+      "status": "pending",
+      "internalNotes": "",
+      "createdAt": "2026-11-02T14:09:15.165Z",
+      "updatedAt": "2026-11-02T14:09:15.165Z"
+    }
+  ],
+  "orderCounter": 4,
+  "adminPassHash": "$2b$10$IKgCQuAKRed7/gaY2sYMUuFSVaLVNWlaGWc6W8X2BpVdrz1ACAZMe",
+  "sessions": [
+    {
+      "token": "caa_7f8c9c7e30e191e69d85dca021eecebb49fcd5f24d03399e31c4180dc244e408",
+      "createdAt": 1793795260278,
+      "expiresAt": 1793881660278
+    },
+    {
+      "token": "caa_sec.eyJ1IjoiYWRtaW4iLCJyIjoic3VwZXJhZG1pbiIsImlhdCI6MTc5Mzc5NjE4MSwiZXhwIjoxNzk0NDAwOTgxLCJqdGkiOiI5YzcyZjMxOWFkNTA0M2MyZmQ3OWMyMzIzYTI3YWY1MiJ9.QOptHi08afrYqZp8b-korH93laRS89WhcJNyCiXyD1M",
+      "createdAt": 1793796181061,
+      "expiresAt": 1794400981061
+    },
+    {
+      "token": "caa_sec.eyJ1IjoiYWRtaW4iLCJyIjoic3VwZXJhZG1pbiIsImlhdCI6MTc5Mzc5NjI0MywiZXhwIjoxNzk0NDAxMDQzLCJqdGkiOiIxNTYyZDlkYzk0NzVmMzYwZDk4MTg4NjE2ZmI5MDcyMyJ9.jbx1MovJKnqLpNvSmdNe03i0M7gAqgdHw9XKsw9ckPg",
+      "createdAt": 1793796242979,
+      "expiresAt": 1794401042979
+    },
+    {
+      "token": "caa_sec.eyJ1IjoiYWRtaW4iLCJyIjoic3VwZXJhZG1pbiIsImlhdCI6MTc5Mzc5NzY5NywiZXhwIjoxNzk0NDAyNDk3LCJqdGkiOiI2YWE4MDE5YzAwODI5NzJlNTEzMTAyNWZkZmE1MTEyZiJ9.gdZpubQR9q9-ALa4PFoVH0TPPTRnE-iAwvoNXS0y-iA",
+      "createdAt": 1793797696875,
+      "expiresAt": 1794402496875
+    },
+    {
+      "token": "caa_sec.eyJ1IjoiYWRtaW4iLCJyIjoic3VwZXJhZG1pbiIsImlhdCI6MTc5Mzc5OTY0NywiZXhwIjoxNzk0NDA0NDQ3LCJqdGkiOiI2YTZmZTM4MTZmMGJiZTI2NDRiY2YxNGQzMTg5M2Y2OSJ9.hCcocxNAi8eC2b_CF5ctFlU3MEfZ0jkeY_m0hpJbzfc",
+      "createdAt": 1793799647390,
+      "expiresAt": 1794404447390
+    },
+    {
+      "token": "caa_sec.eyJ1IjoiYWRtaW4iLCJyIjoic3VwZXJhZG1pbiIsImlhdCI6MTc5Mzg3NzU3MywiZXhwIjoxNzk0NDgyMzczLCJqdGkiOiJjMjczZWE5NGUyYjliMjA4ZmJmMjgzYzJhM2IzMGU2ZCJ9.theMdccKnHZYP__j6jXKpvQr64j2koVvtO6YMk6V20c",
+      "createdAt": 1793877573240,
+      "expiresAt": 1794482373240
+    }
+  ]
+};
+export default initialStoreData;

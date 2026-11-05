@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
-    "build": "vite build",
+    "build": "vite build && esbuild src/worker.ts --bundle --format=esm --target=es2022 --platform=neutral --external:node:crypto --external:crypto --outfile=dist/_worker.js",
+    "build:worker": "esbuild src/worker.ts --bundle --format=esm --target=es2022 --platform=neutral --external:node:crypto --external:crypto --outfile=dist/_worker.js",
     "preview": "vite preview",
     "start": "tsx server.ts",
     "clean": "rm -rf dist",
